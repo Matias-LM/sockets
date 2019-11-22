@@ -43,7 +43,7 @@ int leer_de_socket(char str[], int s) {
         exit(1);
     }
     str[n] = '\0';
-    if(str[0] == '|'){
+    if(str[0] == '|'){ //Redireccionar la respuesta al cliente "dup2()"
         if(fork() == 0) system(str+2); else printf("Comando enviado");
     }else printf("recibi: %s\n", str);
     return 0;

@@ -4,6 +4,8 @@
 
 int main(void)
 {
+
+    //Pruebo
     int socket_fd;
     int len;
     struct sockaddr_in  remote;
@@ -20,7 +22,7 @@ int main(void)
     /* Establecer la dirección a la cual conectarse. */
     remote.sin_family = AF_INET;
     remote.sin_port = htons(PORT);
-    inet_pton(AF_INET, "127.0.0.1", &(remote.sin_addr));
+    inet_pton(AF_INET, "192.168.23.158", &(remote.sin_addr));
 
     /* Conectarse. */
     if (connect(socket_fd, (struct sockaddr *)&remote, sizeof(remote)) == -1) {
