@@ -5,7 +5,6 @@
 int main(void)
 {
 
-    //Pruebo
     int socket_fd;
     int len;
     struct sockaddr_in  remote;
@@ -19,24 +18,30 @@ int main(void)
         exit(1);
     }
 
+
+
     /* Establecer la dirección a la cual conectarse. */
     remote.sin_family = AF_INET;
     remote.sin_port = htons(PORT);
-    inet_pton(AF_INET, "192.168.23.158", &(remote.sin_addr));
+    inet_pton(AF_INET, "127.0.0.1", &(remote.sin_addr));
 
+    printf("a");
+    cout<< "alto";
     /* Conectarse. */
     if (connect(socket_fd, (struct sockaddr *)&remote, sizeof(remote)) == -1) {
         perror("conectandose");
         exit(1);
     }
-    
+    cout << "alto";
     do{
+
         printf("> ");
         fgets(buf, MENSAJE_MAXIMO, stdin);
         if (send(socket_fd, buf, strlen(buf), 0) == -1) {
             perror("enviando");
             exit(1);
         }
+
     }while(!feof(stdin));
 
     /* Cerrar el socket. */

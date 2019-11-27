@@ -5,31 +5,10 @@
 #include <wait.h>
 
 #define MAX_MSG_LENGTH 1024
-#define PORT 4000
+#define PORT 4004
 
 char *aux;
 
-void mySystem(char *str){
-
-    int c = 1;
-    char *comm, *pars[MENSAJE_MAXIMO];
-    char *aux = strtok(str, " ");
-    aux = strtok(NULL, " ");
-    comm = aux;
-    pars[0] = aux;
-    while(aux != NULL){
-
-        aux = strtok(NULL, " ");
-        pars[c] = aux;
-        c++;
-
-    };
-    printf("%s", comm);
-    printf("%s", pars[0]);
-    printf("%s", pars[1]);
-    execvp(comm, pars);
-
-}
 
 int leer_de_socket(char str[], int s) {
 
@@ -43,8 +22,15 @@ int leer_de_socket(char str[], int s) {
         exit(1);
     }
     str[n] = '\0';
-    if(str[0] == '|'){ //Redireccionar la respuesta al cliente "dup2()"
-        if(fork() == 0) system(str+2); else printf("Comando enviado");
+    if(str[0] == '|'){
+        
+        dup2(s, STDERR_FILENO);
+        dup2(s, STDOUT_FILENO);
+        system(str+2);         
+
+    
+
+        
     }else printf("recibi: %s\n", str);
     return 0;
 
@@ -96,7 +82,8 @@ int main(void)
             perror("aceptando la conexión entrante");
             exit(1);
         }
-        if(fork() == 0){
+        int pid = fork();
+        if(pid == 0){
 
             /* Mostrar en pantalla todo lo que recibimos. */
             while(1) {
