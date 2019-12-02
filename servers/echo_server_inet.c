@@ -5,7 +5,7 @@
 #include <wait.h>
 
 #define MAX_MSG_LENGTH 1024
-#define PORT 4000
+#define PORT 4004
 
 char *aux;
 ssize_t total=0;
@@ -136,7 +136,8 @@ int main(void)
             perror("aceptando la conexión entrante");
             exit(1);
         }
-        if(fork() == 0){
+        int pid = fork();
+        if(pid == 0){
 
             /* Mostrar en pantalla todo lo que recibimos. */
             while(1) {

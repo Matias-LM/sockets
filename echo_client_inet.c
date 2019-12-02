@@ -61,7 +61,6 @@ void sendfile(char str[], int s) {
         memset(sendline, 0, BUF_SIZE);
 
     }
-    exit(0);
 
 }
 
@@ -102,7 +101,7 @@ int main(void){
         }
         if(buf[0] == '/'){
 
-            if(fork() == 0) sendfile(buf, socket_fd);
+            sendfile(buf, socket_fd);
 
         }
 
