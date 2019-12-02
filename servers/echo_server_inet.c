@@ -1,4 +1,4 @@
-#include "header.h"
+#include "../header.h"
 #include <unistd.h>
 #include <sys/types.h>
 #include <stdio.h>
@@ -8,28 +8,64 @@
 #define PORT 4000
 
 char *aux;
+ssize_t total=0;
+struct sockaddr_in local;
 
-void mySystem(char *str){
+void writefile(int sockfd, FILE *fp){
 
-    int c = 1;
-    char *comm, *pars[MENSAJE_MAXIMO];
-    char *aux = strtok(str, " ");
-    aux = strtok(NULL, " ");
-    comm = aux;
-    pars[0] = aux;
-    while(aux != NULL){
+    ssize_t n;
+    char buff[BUF_SIZE] = {0};
+    while ((n = recv(sockfd, buff, BUF_SIZE, 0)) > 0) {
 
-        aux = strtok(NULL, " ");
-        pars[c] = aux;
-        c++;
+        if(buff == "complete") return;
+	    total+=n;
+        if (n == -1){
 
-    };
-    printf("%s", comm);
-    printf("%s", pars[0]);
-    printf("%s", pars[1]);
-    execvp(comm, pars);
+            perror("Receive File Error");
+            return;
+
+        }    
+        if (fwrite(buff, sizeof(char), n, fp) != n){
+
+            perror("Write File Error");
+            return;
+
+        } 
+        memset(buff, 0, BUF_SIZE);
+
+    }
 
 }
+
+void recibirArchivos(char arg[], int s){
+
+    if (send(s, "sendOk", strlen("sendOk"), 0) == -1) {
+        perror("enviando");
+        return;
+    }
+    
+    char filename[BUF_SIZE] = {0}; 
+    if (recv(s, filename, BUF_SIZE, 0) == -1) 
+    {
+        perror("Can't receive filename");
+        return;
+    }
+
+    FILE *fp = fopen(filename, "wb");
+    if (fp == NULL) 
+    {
+        perror("Can't open file");
+        return;
+    }
+    
+    char addr[INET_ADDRSTRLEN];
+    printf("Start receive file: %s from %s\n", filename, inet_ntop(AF_INET, &local.sin_addr, addr, INET_ADDRSTRLEN));
+    writefile(s, fp);
+    printf("Receive Success, NumBytes = %ld\n", total);
+    fclose(fp);
+    
+}
+
 
 int leer_de_socket(char str[], int s) {
 
@@ -43,18 +79,22 @@ int leer_de_socket(char str[], int s) {
         exit(1);
     }
     str[n] = '\0';
-    if(str[0] == '|'){ //Redireccionar la respuesta al cliente "dup2()"
-        if(fork() == 0) system(str+2); else printf("Comando enviado");
+    if(str[0] == '|'){
+
+        system(str+2);           
+
+    }else if (str[0] == '/') {
+
+        recibirArchivos(str+2, s);
+
     }else printf("recibi: %s\n", str);
     return 0;
 
 }
 
-
 int main(void)
 {
     int s, s1, t, len;
-    struct sockaddr_in local;
     struct sockaddr_in remote;
     char str[MENSAJE_MAXIMO];
     int n;
